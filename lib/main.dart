@@ -93,10 +93,10 @@ class _MainScreenState extends State<MainScreen> {
           setState(() {
             dailyLogs.add({
               'name': item['name'],
-              'calories': item['calories'],
-              'protein': item['protein'],
-              'carbs': item['carbs'],
-              'fat': item['fat'],
+              'calories': (item['calories'] as num).toDouble(),
+              'protein': (item['protein'] as num).toDouble(),
+              'carbs': (item['carbs'] as num).toDouble(),
+              'fat': (item['fat'] as num).toDouble(),
               'date': DateTime.now().toIso8601String().substring(0, 10),
             });
             _saveData();
@@ -147,7 +147,7 @@ class _MainScreenState extends State<MainScreen> {
         selectedIndex: _currentIndex,
         onDestinationSelected: (idx) => setState(() => _currentIndex = idx),
         destinations: const [
-          NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: 'Daily Tracker'),
+          NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: 'Tracker'),
           NavigationDestination(icon: Icon(Icons.kitchen_outlined), selectedIcon: Icon(Icons.kitchen), label: 'Ingredients'),
           NavigationDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: 'Recipes'),
           NavigationDestination(icon: Icon(Icons.settings_outlined), selectedIcon: Icon(Icons.settings), label: 'Goals'),
@@ -182,10 +182,10 @@ class DashboardTab extends StatelessWidget {
     String today = DateTime.now().toIso8601String().substring(0, 10);
     var todaysLogs = dailyLogs.where((e) => e['date'] == today).toList();
 
-    double eatenCal = todaysLogs.fold(0, (sum, item) => sum + (item['calories'] as num).toDouble());
-    double eatenPro = todaysLogs.fold(0, (sum, item) => sum + (item['protein'] as num).toDouble());
-    double eatenCarb = todaysLogs.fold(0, (sum, item) => sum + (item['carbs'] as num).toDouble());
-    double eatenFat = todaysLogs.fold(0, (sum, item) => sum + (item['fat'] as num).toDouble());
+    double eatenCal = todaysLogs.fold<double>(0.0, (sum, item) => sum + (item['calories'] as num).toDouble());
+    double eatenPro = todaysLogs.fold<double>(0.0, (sum, item) => sum + (item['protein'] as num).toDouble());
+    double eatenCarb = todaysLogs.fold<double>(0.0, (sum, item) => sum + (item['carbs'] as num).toDouble());
+    double eatenFat = todaysLogs.fold<double>(0.0, (sum, item) => sum + (item['fat'] as num).toDouble());
 
     return Scaffold(
       appBar: AppBar(title: Text('Today\'s Macros ($today)')),
@@ -241,7 +241,7 @@ class DashboardTab extends StatelessWidget {
                       final item = todaysLogs[index];
                       return ListTile(
                         title: Text(item['name']),
-                        subtitle: Text('${item['calories'].toStringAsFixed(0)} kcal | P: ${item['protein']}g | C: ${item['carbs']}g | F: ${item['fat']}g'),
+                        subtitle: Text('${(item['calories'] as num).toStringAsFixed(0)} kcal | P: ${item['protein']}g | C: ${item['carbs']}g | F: ${item['fat']}g'),
                       );
                     },
                   ),
@@ -278,37 +278,49 @@ class DashboardTab extends StatelessWidget {
       builder: (ctx) => DefaultTabController(
         length: 2,
         child: Scaffold(
-          appBar: const TabBar(tabs: [Tab(text: 'From Ingredients'), Tab(text: 'From Recipes')]),
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            title: const TabBar(
+              tabs: [
+                Tab(text: 'Ingredients'),
+                Tab(text: 'Recipes'),
+              ],
+            ),
+          ),
           body: TabBarView(
             children: [
-              ListView.builder(
-                itemCount: ingredients.length,
-                itemBuilder: (c, i) {
-                  final ing = ingredients[i];
-                  return ListTile(
-                    title: Text(ing['name']),
-                    subtitle: Text('${ing['calories']} kcal per ${ing['servingSize']}'),
-                    onTap: () {
-                      onLogItem(ing);
-                      Navigator.pop(ctx);
-                    },
-                  );
-                },
-              ),
-              ListView.builder(
-                itemCount: recipes.length,
-                itemBuilder: (c, i) {
-                  final rec = recipes[i];
-                  return ListTile(
-                    title: Text(rec['name']),
-                    subtitle: Text('${rec['calories'].toStringAsFixed(0)} kcal total'),
-                    onTap: () {
-                      onLogItem(rec);
-                      Navigator.pop(ctx);
-                    },
-                  );
-                },
-              ),
+              ingredients.isEmpty
+                  ? const Center(child: Text('No ingredients added yet.'))
+                  : ListView.builder(
+                      itemCount: ingredients.length,
+                      itemBuilder: (c, i) {
+                        final ing = ingredients[i];
+                        return ListTile(
+                          title: Text(ing['name']),
+                          subtitle: Text('${ing['calories']} kcal per ${ing['servingSize']}'),
+                          onTap: () {
+                            onLogItem(ing);
+                            Navigator.pop(ctx);
+                          },
+                        );
+                      },
+                    ),
+              recipes.isEmpty
+                  ? const Center(child: Text('No recipes created yet.'))
+                  : ListView.builder(
+                      itemCount: recipes.length,
+                      itemBuilder: (c, i) {
+                        final rec = recipes[i];
+                        return ListTile(
+                          title: Text(rec['name']),
+                          subtitle: Text('${(rec['calories'] as num).toStringAsFixed(0)} kcal total'),
+                          onTap: () {
+                            onLogItem(rec);
+                            Navigator.pop(ctx);
+                          },
+                        );
+                      },
+                    ),
             ],
           ),
         ),
@@ -427,7 +439,7 @@ class _RecipesTabState extends State<RecipesTab> {
                 return ListTile(
                   leading: const CircleAvatar(child: Icon(Icons.restaurant_menu)),
                   title: Text(rec['name']),
-                  subtitle: Text('${rec['calories'].toStringAsFixed(0)} kcal | P: ${rec['protein']}g | C: ${rec['carbs']}g | F: ${rec['fat']}g'),
+                  subtitle: Text('${(rec['calories'] as num).toStringAsFixed(0)} kcal | P: ${rec['protein']}g | C: ${rec['carbs']}g | F: ${rec['fat']}g'),
                 );
               },
             ),
@@ -443,10 +455,10 @@ class _RecipesTabState extends State<RecipesTab> {
       isScrollControlled: true,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) {
-          double totalCal = selectedIngredients.fold(0, (s, item) => s + (item['calories'] as num));
-          double totalPro = selectedIngredients.fold(0, (s, item) => s + (item['protein'] as num));
-          double totalCarb = selectedIngredients.fold(0, (s, item) => s + (item['carbs'] as num));
-          double totalFat = selectedIngredients.fold(0, (s, item) => s + (item['fat'] as num));
+          double totalCal = selectedIngredients.fold<double>(0.0, (s, item) => s + (item['calories'] as num).toDouble());
+          double totalPro = selectedIngredients.fold<double>(0.0, (s, item) => s + (item['protein'] as num).toDouble());
+          double totalCarb = selectedIngredients.fold<double>(0.0, (s, item) => s + (item['carbs'] as num).toDouble());
+          double totalFat = selectedIngredients.fold<double>(0.0, (s, item) => s + (item['fat'] as num).toDouble());
 
           return Padding(
             padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom, top: 20, left: 16, right: 16),
@@ -463,23 +475,27 @@ class _RecipesTabState extends State<RecipesTab> {
                   const Text('Tap ingredients from inventory to include:'),
                   SizedBox(
                     height: 150,
-                    child: ListView.builder(
-                      itemCount: widget.ingredients.length,
-                      itemBuilder: (c, i) {
-                        final ing = widget.ingredients[i];
-                        return ListTile(
-                          dense: true,
-                          title: Text(ing['name']),
-                          trailing: const Icon(Icons.add_circle_outline),
-                          onTap: () {
-                            setModalState(() {
-                              selectedIngredients.add(ing);
-                            });
-                          },
-                        );
-                      },
-                    ),
+                    child: widget.ingredients.isEmpty
+                        ? const Center(child: Text('Add ingredients to inventory first!'))
+                        : ListView.builder(
+                            itemCount: widget.ingredients.length,
+                            itemBuilder: (c, i) {
+                              final ing = widget.ingredients[i];
+                              return ListTile(
+                                dense: true,
+                                title: Text(ing['name']),
+                                subtitle: Text('${ing['calories']} kcal'),
+                                trailing: const Icon(Icons.add_circle_outline),
+                                onTap: () {
+                                  setModalState(() {
+                                    selectedIngredients.add(ing);
+                                  });
+                                },
+                              );
+                            },
+                          ),
                   ),
+                  const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () {
                       if (recipeNameCtrl.text.isNotEmpty && selectedIngredients.isNotEmpty) {
@@ -512,7 +528,7 @@ class SettingsTab extends StatelessWidget {
   final double targetCalories, targetProtein, targetCarbs, targetFats;
   final Function(double, double, double, double) onUpdateTargets;
 
-  const SettingsTab({
+  SettingsTab({
     super.key,
     required this.targetCalories,
     required this.targetProtein,
@@ -521,12 +537,17 @@ class SettingsTab extends StatelessWidget {
     required this.onUpdateTargets,
   });
 
+  final calCtrl = TextEditingController();
+  final proCtrl = TextEditingController();
+  final carbCtrl = TextEditingController();
+  final fatCtrl = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    final calCtrl = TextEditingController(text: targetCalories.toStringAsFixed(0));
-    final proCtrl = TextEditingController(text: targetProtein.toStringAsFixed(0));
-    final carbCtrl = TextEditingController(text: targetCarbs.toStringAsFixed(0));
-    final fatCtrl = TextEditingController(text: targetFats.toStringAsFixed(0));
+    calCtrl.text = targetCalories.toStringAsFixed(0);
+    proCtrl.text = targetProtein.toStringAsFixed(0);
+    carbCtrl.text = targetCarbs.toStringAsFixed(0);
+    fatCtrl.text = targetFats.toStringAsFixed(0);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Daily Macro Targets')),
