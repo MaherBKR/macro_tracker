@@ -30,7 +30,6 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  // Mock state lists to pass into tabs
   final List> dailyLogs = [];
   final List> ingredients = [];
   final List> recipes = [];
@@ -147,7 +146,6 @@ class RecipesTab extends StatefulWidget {
 }
 
 class _RecipesTabState extends State<RecipesTab> {
-  // Defined state variable for selected ingredients scope
   final List> selectedIngredients = [];
 
   @override
