@@ -30,9 +30,9 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  final List> dailyLogs = [];
-  final List> ingredients = [];
-  final List> recipes = [];
+  final List<dynamic> dailyLogs = [];
+  final List<dynamic> ingredients = [];
+  final List<dynamic> recipes = [];
 
   @override
   Widget build(BuildContext context) {
@@ -89,9 +89,9 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 class DashboardTab extends StatelessWidget {
-  final List> dailyLogs;
-  final List> ingredients;
-  final List> recipes;
+  final List<dynamic> dailyLogs;
+  final List<dynamic> ingredients;
+  final List<dynamic> recipes;
 
   const DashboardTab({
     super.key,
@@ -109,7 +109,7 @@ class DashboardTab extends StatelessWidget {
 }
 
 class IngredientsTab extends StatelessWidget {
-  final List> ingredients;
+  final List<dynamic> ingredients;
 
   const IngredientsTab({
     super.key,
@@ -123,8 +123,8 @@ class IngredientsTab extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = ingredients[index];
         return ListTile(
-          title: Text(item['name'] ?? ''),
-          subtitle: Text('Protein: ${item['protein']}g'),
+          title: Text(item is Map ? (item['name'] ?? '') : ''),
+          subtitle: Text(item is Map ? 'Protein: ${item['protein']}g' : ''),
         );
       },
     );
@@ -132,8 +132,8 @@ class IngredientsTab extends StatelessWidget {
 }
 
 class RecipesTab extends StatefulWidget {
-  final List> ingredients;
-  final List> recipes;
+  final List<dynamic> ingredients;
+  final List<dynamic> recipes;
 
   const RecipesTab({
     super.key,
@@ -146,7 +146,7 @@ class RecipesTab extends StatefulWidget {
 }
 
 class _RecipesTabState extends State<RecipesTab> {
-  final List> selectedIngredients = [];
+  final List<dynamic> selectedIngredients = [];
 
   @override
   Widget build(BuildContext context) {
