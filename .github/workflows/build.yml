@@ -22,6 +22,11 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: true
+
+      - name: Accept Android Licenses
+        run: |
+          yes | flutter doctor --android-licenses
 
       - name: Install Dependencies
         run: flutter pub get
